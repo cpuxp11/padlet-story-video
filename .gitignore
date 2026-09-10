@@ -1,0 +1,14 @@
+node_modules/
+projects/
+out/
+clips/
+frames_*/
+preview/
+*.mp4
+*.mov
+*.MOV
+*.wav
+*.mp3
+_*.txt
+.DS_Store
+.omc/

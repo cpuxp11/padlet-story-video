@@ -1,0 +1,16 @@
+{
+  "name": "padlet-story-video",
+  "version": "0.1.0",
+  "description": "패들릿에 올린 아이들 결과물(이야기·그림·노래·AI영상)을 세로 영상(1080x1920)으로 만드는 파이프라인",
+  "type": "module",
+  "scripts": {
+    "fetch": "node scripts/padlet_fetch.mjs",
+    "preview": "node scripts/preview.mjs",
+    "render": "node scripts/render.mjs",
+    "assemble": "node scripts/assemble.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.50.0"
+  },
+  "license": "MIT"
+}
