@@ -53,7 +53,7 @@ function overlay(base, json, out) {
   const args = ['-i', base]; const fc = []; let prev = '[0:v]';
   vids.forEach((v, i) => {
     args.push('-i', v.vid);
-    fc.push(`[${i + 1}:v]scale=1000:562,fps=30,setpts=PTS-STARTPTS+${v.s}/TB[v${i}]`);
+    fc.push(`[${i + 1}:v]scale=1000:562,fps=30,tpad=stop_mode=clone:stop_duration=${Math.max(0, v.d).toFixed(2)},setpts=PTS-STARTPTS+${v.s}/TB[v${i}]`);  // 비트가 영상보다 길면 마지막 프레임 홀드
     fc.push(`${prev}[v${i}]overlay=40:619:enable='between(t,${v.s},${v.s + v.d})':eof_action=pass[o${i}]`); prev = `[o${i}]`;
   });
   ff([...args, '-filter_complex', fc.join(';'), '-map', prev, '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', out]);

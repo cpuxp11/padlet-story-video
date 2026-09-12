@@ -29,6 +29,18 @@
 
 **이 레포에 아이들 실제 자산은 들어 있지 않습니다**(초상권). `examples/` 는 구조만 보여주는 예시입니다.
 
+## 빠른 시작 — URL 한 줄로 초안 mp4 (완전 자동)
+
+```bash
+node scripts/run.mjs "https://padlet.com/아이디/보드" --name w2 --section 2주차 \
+  --title "남해 워케이션 2주차" --hero "금산에는<br>이런 노래가" --music ~/음악폴더
+# → projects/w2/w2_auto_v1.mp4
+```
+`run.mjs` = fetch → transcribe(whisper 있으면) → **auto_spec**(규칙으로 대본 자동 생성) → render → assemble.
+자동 대본 규칙: 섹션 1개=아이 1챕터, 이야기 글→타이핑, 노래 있으면 가사를 whisper 시각에 맞춰 그림 순환·AI영상은 후렴에, 노래 없으면 CC 음악 베드.
+실제 남해 2주차 보드로 돌린 결과: 아이 3명, 4분 57초, 가사 싱크 김민 9/15줄·송시준 8/10·안현수 8/8 (나머지 줄은 이웃 사이 등분). 노래 앞부분(1절)은 whisper 가 잘 놓치므로 그 구간은 타이밍이 대충일 수 있습니다.
+품질은 사람이 짠 대본보다 단순합니다. 마음에 안 드는 부분은 `projects/w2/spec2.js` 숫자·문구만 고치고 `render`·`assemble` 만 다시 돌리면 됩니다(아래 3~4단계).
+
 ## 1. 설치
 
 ```bash
@@ -94,7 +106,9 @@ node scripts/assemble.mjs projects/내프로젝트 완성_v1.mp4
 ## 폴더 구조
 
 ```
+scripts/run.mjs            원샷: URL → mp4 (아래 전부 순서대로)
 scripts/padlet_fetch.mjs   패들릿 → posts.md + assets/
+scripts/auto_spec.mjs      posts.json + assets → spec2.js 자동 초안
 scripts/transcribe.py      mp3 → 가사 타임스탬프
 scripts/preview.mjs        프레임 미리보기
 scripts/render.mjs         spec2.js → out/NN_id.mp4 (+ vid.json)
