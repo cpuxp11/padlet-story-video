@@ -80,6 +80,15 @@ Claude Code 를 쓰면 [PROMPT.md](PROMPT.md) 의 프롬프트를 붙여넣고 `
 - 노래가 있는 아이는 노래를 챕터 0초에 깔고(`music:`), 가사 `at` 은 노래 초로 씁니다. 전곡은 길어지므로 보통 1절~첫 후렴에서 `fadeOut`.
 - 노래가 없는 아이는 CC 음악을 `music:` 에 지정하고 이야기 문장을 가사 자리에 씁니다.
 - 촬영 클립은 `clips.conf` 에 적고 챕터의 `clips:["c1"]` 로 그 챕터 앞에 끼웁니다(예: `examples/clips.conf.example`).
+- 가사 줄은 `<br>` 로 의미 단위 줄바꿈을 지정합니다("하늘에서 내려오는<br>초록빛 선물에").
+
+### 구성 두 가지
+| 구성 | 예시 파일 | 흐름 |
+|---|---|---|
+| 뮤직비디오 | `examples/spec2.example.js` | 아이마다 노래 1절~후렴에 가사 타이핑 |
+| **과정 + 노래 합본** (남해 2주차 최종본) | `examples/spec2.process-song.example.js` | 아이마다 [질문 카드 → 아이의 답 → 그림 수정 전후] → [노래 후렴] |
+
+합본은 과정 챕터에 `music` 을 비워 두고 `AUDIO.bridge.jumps` 로 배경음이 챕터마다 다른 프레이즈에서 시작하게 합니다. 노래 챕터는 `music.ss` 로 후렴 시작 초를 지정합니다.
 
 ## 4. 미리보기 → 렌더 → 조립
 
@@ -115,7 +124,7 @@ scripts/render.mjs         spec2.js → out/NN_id.mp4 (+ vid.json)
 scripts/assemble.mjs       클립·오버레이·음악 → 완성 mp4
 renderer/film2.html        렌더러(단일 HTML). 비트 타입 구현
 fonts/BMJUA.otf            배민 주아체(동봉)
-examples/                  spec2.example.js, clips.conf.example
+examples/                  spec2.example.js(뮤직비디오), spec2.process-song.example.js(과정+노래 합본), clips.conf.example
 docs/spec-cheatsheet.md    비트 치트시트 + 함정
 PROMPT.md                  Claude Code 에 붙여넣는 마스터 프롬프트
 projects/                  (git 무시) 내 프로젝트들

@@ -5,8 +5,10 @@
 //   clips:["c1","t1"]      이 챕터 "앞"에 끼울 촬영 클립 이름(clips.conf 의 이름)
 //   music:{file, ss:0, I:-14, fadeIn:0.05, fadeOut:4, tail:0.2}   챕터 0초에 맞춰 까는 음악(아이 노래 등)
 //   music:"carry"          앞 챕터 음악을 그대로 이어감(끊지 않음)
-// 전역: window.AUDIO = { bridge:{file, ss:0, I:-16, fadeIn:0.3, fadeOut:1.0} }  음악이 없는 구간(인트로·클립·지정 안 한 챕터)을 채우는 배경음
-// clips.conf: 이름:파일(확장자 포함):시작초:길이[:라벨[:crop w,h,x,y[:캡션1[:캡션2]]]]   (LUT는 window.AUDIO.lut 또는 CLIPS_LUT 환경변수)
+// 전역: window.AUDIO = { bridge:{file, ss:0, I:-16, fadeIn:0.3, fadeOut:1.0, jumps:[0,36.4,66.6]} }  음악이 없는 구간을 채우는 배경음.
+//        jumps 를 주면 빈 구간마다 곡의 다른 프레이즈(초)에서 시작 — 매번 같은 도입부가 반복되지 않게
+// clips.conf: 이름:파일(확장자 포함, 절대경로 가능):시작초:길이[:라벨[:crop w,h,x,y[:캡션1[:캡션2[:캡션머리말]]]]]   (LUT는 window.AUDIO.lut 또는 CLIPS_LUT 환경변수)
+//   캡션머리말 기본값 "실제로 이렇게 쳤습니다" — 태블릿 화면 컷이면 "화면에 나온 그림" 등으로
 import fs from 'fs'; import path from 'path'; import { execFileSync } from 'child_process';
 import vm from 'vm';
 
@@ -31,7 +33,7 @@ if (fs.existsSync('clips.conf')) {
   fs.mkdirSync('clips', { recursive: true });
   for (const line of fs.readFileSync('clips.conf', 'utf8').split('\n')) {
     if (!line.trim() || line.startsWith('#')) continue;
-    const [nm, file, ss, len, label = '', crop = '', cap1 = '', cap2 = ''] = line.split(':');
+    const [nm, file, ss, len, label = '', crop = '', cap1 = '', cap2 = '', head = '실제로 이렇게 쳤습니다'] = line.split(':');
     const out = `clips/${nm}.mp4`; clips[nm] = out;
     if (fs.existsSync(out)) continue;
     let vf = LUT ? `lut3d='${LUT}'` : 'null';
@@ -39,8 +41,8 @@ if (fs.existsSync('clips.conf')) {
     vf += ',scale=1000:-2,pad=iw+36:ih+36:18:18:white,pad=1080:1920:(ow-iw)/2:(oh-ih)/2-60:0xFFF8EC,fps=30,setsar=1';
     const dt = (t, y, size, color) => `,drawtext=fontfile='${FONT}':text='${t.replace(/'/g, '')}':x=(w-text_w)/2:y=${y}:fontsize=${size}:fontcolor=${color}`;
     if (label) vf += dt(label, 1330, 100, '0x2B2118');
-    if (cap1) { vf += dt('실제로 이렇게 쳤습니다', 1290, 50, '0xB08968') + dt(cap1, 1370, 68, '0x2B2118'); if (cap2) vf += dt(cap2, 1455, 68, '0x2B2118'); }
-    ff(['-ss', ss, '-t', len, '-i', path.join(CLIP_SRC, file), '-vf', vf, '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', out]);
+    if (cap1) { vf += dt(head, 1290, 50, '0xB08968') + dt(cap1, 1370, 68, '0x2B2118'); if (cap2) vf += dt(cap2, 1455, 68, '0x2B2118'); }
+    ff(['-ss', ss, '-t', len, '-i', path.isAbsolute(file) ? file : path.join(CLIP_SRC, file), '-vf', vf, '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', out]);
     console.log('클립', out);
   }
 }
@@ -101,7 +103,8 @@ if (AUDIO.bridge) {
   let gaps = []; let pos = 0;
   for (const c of covered.sort((a, b) => a.at - b.at)) { if (c.at - pos > 0.5) gaps.push([pos, c.at]); pos = Math.max(pos, c.end); }
   if (TOTAL - pos > 0.5) gaps.push([pos, TOTAL]);
-  for (const [a, b] of gaps) seg(AUDIO.bridge, a, b - a + 0.4);
+  const J = AUDIO.bridge.jumps || [];
+  gaps.forEach(([a, b], i) => seg({ ...AUDIO.bridge, ss: J.length ? J[i % J.length] : (AUDIO.bridge.ss ?? 0) }, a, b - a + 0.4));
   console.log('브릿지 구간', gaps.map(g => `${g[0].toFixed(1)}-${g[1].toFixed(1)}`).join(', '));
 }
 if (!layers.length) { fs.copyFileSync('_video.mp4', outName); console.log('음악 없음 →', outName); process.exit(0); }

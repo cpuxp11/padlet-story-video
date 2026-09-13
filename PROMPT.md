@@ -12,11 +12,14 @@
  - 가사 타이밍: assets/*/*.lyrics.txt (있으면)
  - 수업 사진: projects/<프로젝트>/assets/photos/  /  촬영본: projects/<프로젝트>/footage/  (있으면)
  - 아이 이름·표기: <실명 / 별명 / 이니셜 중 무엇으로 넣을지>
+ - 구성: <뮤직비디오(examples/spec2.example.js) / 과정+노래 합본(examples/spec2.process-song.example.js)>
 [절대 규칙]
  - 화면의 아이 문장·가사는 posts.md 원문 그대로. 오타·말투 수정 금지.
  - 노래가 있는 아이: 노래를 챕터 0초에 깔고(music:), 가사 at 은 .lyrics.txt 의 초. 1절~첫 후렴까지만 쓰고 fadeOut:4. 
  - 노래가 없는 아이: music 에 CC 곡(music/ 폴더) 지정, 가사 자리에 이야기 문장.
  - AI 영상(10초)은 mv 비트의 vid 로 카드에 넣는다. 후렴 시작에 맞추면 좋다.
+ - 가사·자막 줄은 <br> 로 의미 단위 줄바꿈을 넣는다("하늘에서 내려오는<br>초록빛 선물에").
+ - 합본이면: 과정 챕터(질문 카드→답 채팅→히어로→수정 전후 still+order)는 music 없이 AUDIO.bridge.jumps 로, 노래 챕터는 music.ss=후렴 시작 초.
  - 유료 이미지/영상 API 호출 0회. 새 그림을 만들지 않는다. 있는 자산만 쓴다.
  - 크림 배경(#FFF8EC)·오렌지(#E8590C)·주아체 히어로·Gmarket 자막. 렌더러(renderer/film2.html)는 고치지 않는다.
 [절차]
@@ -36,3 +39,5 @@
 | 그림이 자막에 가린다 | 렌더러가 자동 축소하지만, `w:880` 처럼 카드 폭 지정 가능 |
 | 이름을 별명으로 | 챕터 `nick`, `answers.rows`, `clips.conf` 라벨 |
 | 특정 아이 빼기 | `window.SPEC2` 배열에서 챕터 제거 + `answers.rows` |
+| 배경음이 챕터마다 똑같이 반복된다 | `AUDIO.bridge.jumps` 에 곡의 프레이즈 시작 초 목록 |
+| 태블릿 컷 캡션 머리말 바꾸기 | `clips.conf` 9번째 필드(예: `화면에 나온 그림`) |

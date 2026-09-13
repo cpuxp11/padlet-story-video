@@ -58,7 +58,8 @@ function spanifyLy(txt){ // 가사용: 단어 단위 nowrap (단어 중간 줄�
   for(const p of parts){
     if(p==='<b>'){ac=true;out+='<span class="ac">';continue;}
     if(p==='</b>'){ac=false;out+='</span>';continue;}
-    out+=p.split(' ').map(w=>'<span style="white-space:nowrap">'+[...w].map(c=>'<span class="ch">'+c+'</span>').join('')+'</span>').join('<span class="ch">&nbsp;</span><wbr>');
+    // <br> 로 의미 단위 줄바꿈을 지정할 수 있다(가사 "하늘에서 내려오는<br>초록빛 선물에")
+    out+=p.split('<br>').map(seg=>seg.split(' ').map(w=>'<span style="white-space:nowrap">'+[...w].map(c=>'<span class="ch">'+c+'</span>').join('')+'</span>').join('<span class="ch">&nbsp;</span><wbr>')).join('<br>');
   }
   return out;
 }
@@ -244,7 +245,7 @@ function seek(t){
       b._n.querySelectorAll('.ln').forEach(ln=>{
         if(!ln.dataset.fx){
           const sp=ln.querySelectorAll('.ch'); let w=0; sp.forEach(c=>w+=c.offsetWidth);
-          if(w>960) ln.style.fontSize='80px';
+          if(w>980) ln.style.fontSize=Math.floor(96*980/w)+'px';   // 폭 비례 축소 — 어떤 길이든 화면 안
           ln.dataset.fx=1;
         }
         typeChars(ln,(lt-parseFloat(ln.dataset.at))/0.50);
