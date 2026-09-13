@@ -7,6 +7,7 @@
 //   music:"carry"          앞 챕터 음악을 그대로 이어감(끊지 않음)
 // 전역: window.AUDIO = { bridge:{file, ss:0, I:-16, fadeIn:0.3, fadeOut:1.0, jumps:[0,36.4,66.6]} }  음악이 없는 구간을 채우는 배경음.
 //        jumps 를 주면 빈 구간마다 곡의 다른 프레이즈(초)에서 시작 — 매번 같은 도입부가 반복되지 않게
+//        xfade(기본 = 직전 음악의 fadeOut) = 노래가 끝나는 지점보다 이만큼 일찍 배경음을 시작해 겹쳐 넘어감
 // clips.conf: 이름:파일(확장자 포함, 절대경로 가능):시작초:길이[:라벨[:crop w,h,x,y[:캡션1[:캡션2[:캡션머리말]]]]]   (LUT는 window.AUDIO.lut 또는 CLIPS_LUT 환경변수)
 //   캡션머리말 기본값 "실제로 이렇게 쳤습니다" — 태블릿 화면 컷이면 "화면에 나온 그림" 등으로
 import fs from 'fs'; import path from 'path'; import { execFileSync } from 'child_process';
@@ -100,11 +101,17 @@ if (cur) covered.push(cur);
 for (const c of covered) seg(c.m, c.at, Math.min(c.end - c.at + (c.m.tail ?? 0.2), TOTAL - c.at));
 // 빈 구간 → 브릿지 음악
 if (AUDIO.bridge) {
-  let gaps = []; let pos = 0;
-  for (const c of covered.sort((a, b) => a.at - b.at)) { if (c.at - pos > 0.5) gaps.push([pos, c.at]); pos = Math.max(pos, c.end); }
-  if (TOTAL - pos > 0.5) gaps.push([pos, TOTAL]);
+  let gaps = []; let pos = 0; let prevFo = 0;   // prevFo = 이 빈 구간 직전 음악의 fadeOut 길이
+  for (const c of covered.sort((a, b) => a.at - b.at)) { if (c.at - pos > 0.5) gaps.push([pos, c.at, prevFo]); pos = Math.max(pos, c.end); prevFo = c.m.fadeOut ?? 1.0; }
+  if (TOTAL - pos > 0.5) gaps.push([pos, TOTAL, prevFo]);
   const J = AUDIO.bridge.jumps || [];
-  gaps.forEach(([a, b], i) => seg({ ...AUDIO.bridge, ss: J.length ? J[i % J.length] : (AUDIO.bridge.ss ?? 0) }, a, b - a + 0.4));
+  // 앞 노래가 페이드아웃하는 동안 배경음을 미리 시작하고, 같은 길이로 페이드인 → 넘어가는 지점의 음량 골짜기 제거
+  gaps.forEach(([a, b, fo], i) => {
+    const XF = a > 0 ? (AUDIO.bridge.xfade ?? fo) : 0;
+    const st = Math.max(0, a - XF);
+    const fadeIn = Math.max(AUDIO.bridge.fadeIn ?? 0.3, XF);
+    seg({ ...AUDIO.bridge, fadeIn, ss: J.length ? J[i % J.length] : (AUDIO.bridge.ss ?? 0) }, st, b - st + 0.4);
+  });
   console.log('브릿지 구간', gaps.map(g => `${g[0].toFixed(1)}-${g[1].toFixed(1)}`).join(', '));
 }
 if (!layers.length) { fs.copyFileSync('_video.mp4', outName); console.log('음악 없음 →', outName); process.exit(0); }

@@ -7,7 +7,8 @@
     "fetch": "node scripts/padlet_fetch.mjs",
     "preview": "node scripts/preview.mjs",
     "render": "node scripts/render.mjs",
-    "assemble": "node scripts/assemble.mjs"
+    "assemble": "node scripts/assemble.mjs",
+    "qa": "node scripts/qa_overflow.mjs"
   },
   "dependencies": {
     "playwright": "^1.50.0"

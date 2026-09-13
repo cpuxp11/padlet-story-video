@@ -25,7 +25,7 @@
 [절차]
  1. posts.md 를 읽고 아이별로 (이야기 / 가사 / 그림 / 노래 / 영상 / 빠진 것) 표로 정리해 나한테 먼저 보여줘. 빠진 게 있으면 묻는다.
  2. examples/spec2.example.js 를 본떠 projects/<프로젝트>/spec2.js 작성 (인트로 → 아이별 챕터 → 아웃트로). 비트는 docs/spec-cheatsheet.md.
- 3. node scripts/preview.mjs 로 챕터마다 3~4 프레임 찍어 보여주고, 통과되면 node scripts/render.mjs 전체.
+ 3. node scripts/qa_overflow.mjs 로 글자 잘림 0건 확인 → node scripts/preview.mjs 로 챕터마다 3~4 프레임 찍어 보여주고, 통과되면 node scripts/render.mjs 전체.
  4. node scripts/assemble.mjs 로 완성 mp4. 프레임 실측(AI영상 카드·가사 줄바꿈)과 오디오 RMS 를 확인한 뒤 경로를 보고.
  5. 피드백은 국소 수정만(spec 숫자·문구·자산 교체). 전면 재작업 금지.
 ```

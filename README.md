@@ -108,6 +108,8 @@ node scripts/assemble.mjs projects/내프로젝트 완성_v1.mp4
 
 ## 5. 검수 (완료 주장 전에)
 
+- 글자 잘림 자동 검사: `node scripts/qa_overflow.mjs projects/내프로젝트` — 렌더 없이 몇 초, 모든 비트에서 화면 밖으로 나간 글자를 찾습니다(잘림이 있으면 종료 코드 1). **render 전에 먼저** 돌리세요. 긴 자막은 눈으로 훑으면 놓칩니다.
+
 - 프레임 실측: `ffmpeg -ss 88 -i 완성_v1.mp4 -frames:v 1 f.jpg` 로 AI 영상이 카드 안에 들어갔는지, 가사가 단어 중간에서 안 끊기는지.
 - 오디오: 노래 구간 RMS 가 -14 ~ -16 dB 근처인지(무음 구간이 생기면 `music`/`bridge` 설정 확인).
 - 아이 문장이 원문과 같은지 `posts.md` 와 대조.
@@ -120,6 +122,7 @@ scripts/padlet_fetch.mjs   패들릿 → posts.md + assets/
 scripts/auto_spec.mjs      posts.json + assets → spec2.js 자동 초안
 scripts/transcribe.py      mp3 → 가사 타임스탬프
 scripts/preview.mjs        프레임 미리보기
+scripts/qa_overflow.mjs    화면 밖 글자 잘림 자동 검사
 scripts/render.mjs         spec2.js → out/NN_id.mp4 (+ vid.json)
 scripts/assemble.mjs       클립·오버레이·음악 → 완성 mp4
 renderer/film2.html        렌더러(단일 HTML). 비트 타입 구현
@@ -138,6 +141,7 @@ projects/                  (git 무시) 내 프로젝트들
 - 가사 줄은 단어 단위로 줄바꿈합니다(글자 단위 X). 긴 줄은 자동 2줄.
 - macOS 기본 bash 는 3.x — 셸 스크립트 대신 node 로 조립하는 이유입니다.
 - ffmpeg `adelay` 뒤에 출력 `-t` 를 걸면 무음이 되는 케이스가 있어 입력 `-t` 로 자릅니다.
+- 노래 챕터 → 배경음으로 넘어갈 때 음량이 푹 꺼지면("음악이 끊긴다"), 배경음이 노래 페이드아웃과 겹쳐 시작하지 않은 것입니다. `assemble` 은 기본으로 직전 음악의 `fadeOut` 길이만큼 겹쳐 시작합니다(`AUDIO.bridge.xfade` 로 조절).
 
 ## 라이선스
 
